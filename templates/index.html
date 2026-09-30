@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicCraft - AI Comic Story Creator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(10, 25, 45, 0.45), rgba(10, 25, 45, 0.65)),
+                        url('https://images.unsplash.com/photo-1511497584788-87676104235f?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 580px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+            padding: 2.5rem 2rem;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #0b3954;
+            font-size: 1.9rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .header p {
+            color: #556070;
+            font-size: 0.95rem;
+            margin-top: 0.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.45rem;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #111827;
+            background-color: #f9fafb;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #0284c7;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 85px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: #0284c7;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-submit:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.45);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none;
+            text-align: center;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f0f9ff;
+            border: 1px dashed #0284c7;
+            border-radius: 8px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(2, 132, 199, 0.2);
+            border-radius: 50%;
+            border-top-color: #0284c7;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #0369a1;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span>✏️</span> Create Your Comic</h1>
+            <p>Transform your imagination into a 5-panel illustrated comic story</p>
+        </div>
+
+        <form id="comicForm" action="/generate" method="POST">
+            <div class="form-group">
+                <label for="prompt">Story Prompt:</label>
+                <textarea id="prompt" name="prompt" rows="3" required placeholder="A brave fox explores an enchanted forest.">A brave fox explores an enchanted forest.</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="character_name">Main Character Name:</label>
+                <input type="text" id="character_name" name="character_name" required value="Free" placeholder="e.g. Free, Luna, Alex">
+            </div>
+
+            <div class="form-group">
+                <label for="setting">Setting:</label>
+                <select id="setting" name="setting">
+                    <option value="Forest" selected>Forest</option>
+                    <option value="School">School</option>
+                    <option value="Space">Space</option>
+                    <option value="City">City</option>
+                    <option value="Enchanted Castle">Enchanted Castle</option>
+                    <option value="Cyberpunk Metropolis">Cyberpunk Metropolis</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tone">Story Tone:</label>
+                <select id="tone" name="tone">
+                    <option value="Dramatic" selected>Dramatic</option>
+                    <option value="Light-hearted">Light-hearted</option>
+                    <option value="Funny">Funny</option>
+                    <option value="Poetic">Poetic</option>
+                    <option value="Action-packed">Action-packed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="style">Art Style:</label>
+                <select id="style" name="style">
+                    <option value="Realistic" selected>Realistic</option>
+                    <option value="Anime">Anime</option>
+                    <option value="Comic Book">Comic Book</option>
+                    <option value="Pixel Art">Pixel Art</option>
+                    <option value="Watercolor">Watercolor</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                Generate Comic
+            </button>
+
+            <div class="loading-overlay" id="loadingBox">
+                <div class="spinner"></div>
+                <div class="loading-text">Crafting storyline & generating illustrations... Please wait!</div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('comicForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingBox = document.getElementById('loadingBox');
+
+        form.addEventListener('submit', () => {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+            submitBtn.innerText = 'Creating Comic...';
+            loadingBox.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+google-generativeai
+diffusers
+transformers
+fpdf2
+Pillow
+accelerate
+python-dotenv
+requests
